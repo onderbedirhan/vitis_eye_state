@@ -17,6 +17,7 @@ from tensorflow.python.platform import gfile
 #from tensorflow_model_optimization.quantization.keras import vitis_quantize
 import matplotlib.pyplot as plt
 import shutil
+from tensorflow_model_optimization.quantization.keras import vitis_quantize
 
 
 import os
@@ -249,12 +250,17 @@ def main():
     parser.add_argument('--output_nodes', type=str, default='', help='List of output nodes of the graph.')   
     args = parser.parse_args()
 
-    #train_dataset, test_dataset = preprocess(args.image_dir)
+    train_dataset, test_dataset = preprocess(args.image_dir)
     #train(train_dataset, test_dataset)   
-    freeze_graph(args.model, args.input_nodes)
+    #freeze_graph(args.model, args.input_nodes)
     #optimize_graph(args.input_nodes, args.output_nodes)
     #evaluate_graph(args.graph, args.batch_size, test_dataset, args.input_node, args.output_node)
-    #test(args.model, args.imagfe_dir)    
+    #test(args.model, args.imagfe_dir)
+    model  = keras.models.load_model('saved_model/classification_model.h5')
+
+    quantizer = vitis_quantize.VitisQuantizer(model)
+    quantized_model = quantizer.quantize_model(calib_dataset=train_dataset[0:500])
+    quantized_model.save("quantized_model.h5")    
     
         
 if __name__ == '__main__':
